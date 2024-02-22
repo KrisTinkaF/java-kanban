@@ -1,3 +1,5 @@
+package model;
+
 import java.util.Objects;
 
 public class Task {
@@ -6,21 +8,21 @@ public class Task {
     private String description;
     private Status status;
 
-    private Type type;
+    //private Type type;
 
-    public Task(int id, String name, String description, Status status, Type type) {
+    public Task(int id, String name, String description, Status status) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
-        this.type = type;
+        //this.type = type;
     }
-    public Task( String name, String description, Status status, Type type) {
+    public Task( String name, String description, Status status) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
-        this.type = type;
+        //this.type = type;
     }
 
     public int getId() {
@@ -55,11 +57,7 @@ public class Task {
     }
 
     public Type getType() {
-        return type;
-    }
-
-    public void setType(Type type) {
-        this.type = type;
+        return Type.TASK;
     }
 
     @Override
@@ -82,7 +80,7 @@ public class Task {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
-                ", type=" + type +
+                //", type=" + type +
                 '}';
     }
 }

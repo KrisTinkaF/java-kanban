@@ -1,3 +1,5 @@
+package model;
+
 public class Subtask extends Task {
     public int getParentId() {
         return parentId;
@@ -8,14 +10,18 @@ public class Subtask extends Task {
     }
 
     private int parentId;
-    public Subtask(int id, String name, String description, Status status, Type type, int parentId) {
-        super(id, name, description, status, type);
+    public Subtask(int id, String name, String description, Status status, int parentId) {
+        super(id, name, description, status);
         this.parentId = parentId;
     }
 
-    public Subtask( String name, String description, Status status, Type type, int parentId) {
-        super(name, description, status, type);
+    public Subtask( String name, String description, Status status, int parentId) {
+        super(name, description, status);
         this.parentId = parentId;
+    }
+
+    public Type getType() {
+        return Type.SUBTASK;
     }
 
     @Override
