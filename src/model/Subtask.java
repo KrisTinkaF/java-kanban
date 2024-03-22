@@ -1,23 +1,19 @@
 package model;
 
 public class Subtask extends Task {
-    public int getParentId() {
-        return parentId;
+    public Epic getParent() {
+        return parent;
     }
 
-    public void setParentId(int parentId) {
-        this.parentId = parentId;
-    }
-
-    private int parentId;
-    public Subtask(int id, String name, String description, Status status, int parentId) {
+    private Epic parent;
+    public Subtask(int id, String name, String description, Status status, Epic parent) {
         super(id, name, description, status);
-        this.parentId = parentId;
+        this.parent = parent;
     }
 
-    public Subtask( String name, String description, Status status, int parentId) {
-        super(name, description, status);
-        this.parentId = parentId;
+    public Subtask( String name, String description, Epic parent) {
+        super(name, description);
+        this.parent = parent;
     }
 
     public Type getType() {
@@ -25,9 +21,17 @@ public class Subtask extends Task {
     }
 
     @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Subtask subtask = (Subtask) object;
+        return getId() == subtask.getId();
+    }
+
+    @Override
     public String toString() {
         return "Subtask{" + super.toString() +
-                "parentId=" + parentId +
+                "parentId=" + parent.getId() +
                 "} ";
     }
 }
