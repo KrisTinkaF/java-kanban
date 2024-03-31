@@ -5,7 +5,7 @@ public class Main {
 
     public static void main(String[] args) {
         final TaskManager inMemoryTaskManager = Managers.getDefault();
-        final HistoryManager inMemoryHistoryManager = InMemoryTaskManager.inMemoryHistoryManager;
+        final HistoryManager inMemoryHistoryManager = inMemoryTaskManager.getInMemoryHistoryManager();
         System.out.println("---CREATE---");
         Task task1 = new Task("Купить продукты", "мясо, макароны, лук, морковь");
         System.out.println(inMemoryTaskManager.createTask(task1));

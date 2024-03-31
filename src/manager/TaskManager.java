@@ -5,11 +5,12 @@ import model.Task;
 import model.Type;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface TaskManager {
     Task createTask(Task task);
 
-    ArrayList<Task> getAllTasks(Type type);
+    List<Task> getAllTasks(Type type);
 
     void deleteAllTasks(Type type);
 
@@ -23,6 +24,7 @@ public interface TaskManager {
 
     //Epic updateEpic(Epic epic);
 
-    ArrayList<Subtask> getSubtaskByEpic(Task epic);
+    List<Subtask> getSubtaskByEpic(Task epic);
 
+    HistoryManager getInMemoryHistoryManager();
 }

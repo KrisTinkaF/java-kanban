@@ -8,13 +8,15 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 class InMemoryTaskManagerTest {
 
     final static TaskManager inMemoryTaskManager = Managers.getDefault();
-    final HistoryManager inMemoryHistoryManager = InMemoryTaskManager.inMemoryHistoryManager;
-
+    //final HistoryManager inMemoryHistoryManager = InMemoryTaskManager.inMemoryHistoryManager;
+    final HistoryManager inMemoryHistoryManager = inMemoryTaskManager.getInMemoryHistoryManager();
     @BeforeAll
     static void beforeAll() {
         Task task = inMemoryTaskManager.createTask(new Task("Test Task", "Test Task desc"));
@@ -34,7 +36,7 @@ class InMemoryTaskManagerTest {
         assertEquals(newTask, savedTask, "Задачи не совпадают.");
         assertEquals(Type.TASK, savedTask.getType(), "Тип задачи не равен ожидаемому.");
 
-        final ArrayList<Task> tasks = inMemoryTaskManager.getAllTasks(Type.TASK);
+        final List<Task> tasks = inMemoryTaskManager.getAllTasks(Type.TASK);
 
         assertNotEquals(tasks, new ArrayList<>(),"Задачи не возвращаются.");
         System.out.println("tasks "+tasks);
@@ -50,7 +52,7 @@ class InMemoryTaskManagerTest {
         assertEquals(newEpic, savedEpic, "Эпики не совпадают.");
         assertEquals(Type.EPIC, savedEpic.getType(), "Тип задачи не равен ожидаемому.");
 
-        final ArrayList<Task> epics = inMemoryTaskManager.getAllTasks(Type.EPIC);
+        final List<Task> epics = inMemoryTaskManager.getAllTasks(Type.EPIC);
 
         assertNotEquals(epics, new ArrayList<>(),"Эпики не возвращаются.");
         System.out.println("epics "+epics);
@@ -66,7 +68,7 @@ class InMemoryTaskManagerTest {
         assertEquals(newSubtask, savedSubtask, "Подзадачи не совпадают.");
         assertEquals(Type.SUBTASK, savedSubtask.getType(), "Тип задачи не равен ожидаемому.");
 
-        final ArrayList<Task> subtasks = inMemoryTaskManager.getAllTasks(Type.SUBTASK);
+        final List<Task> subtasks = inMemoryTaskManager.getAllTasks(Type.SUBTASK);
 
         assertNotEquals(subtasks, new ArrayList<>(), "Подзадачи не возвращаются.");
         System.out.println("subtasks createNewTask"+subtasks);
@@ -77,7 +79,7 @@ class InMemoryTaskManagerTest {
     @Test
     void getSubtasksByEpic() {
         Epic epic = (Epic) inMemoryTaskManager.getById(2);
-        ArrayList<Subtask> subtasks = inMemoryTaskManager.getSubtaskByEpic(epic);
+        List<Subtask> subtasks = inMemoryTaskManager.getSubtaskByEpic(epic);
         assertNotEquals(subtasks, new ArrayList<>(),"Подзадачи эпика не возвращаются.");
         assertEquals(2, subtasks.size(), "Неверное количество подзадач эпика.");
     }
@@ -107,19 +109,19 @@ class InMemoryTaskManagerTest {
         assertEquals(Status.NEW, epic.getStatus(), "Статус эпика не изменился, хотя подзадача удалена!");
 
         inMemoryTaskManager.deleteById(2); //Удаляем эпик
-        ArrayList<Subtask> subtasks = inMemoryTaskManager.getSubtaskByEpic(epic);
+        List<Subtask> subtasks = inMemoryTaskManager.getSubtaskByEpic(epic);
         assertEquals(subtasks, new ArrayList<>(),"Подзадачи эпика не удалены вместе с ним!");
 
         inMemoryTaskManager.deleteAllTasks(Type.TASK);
-        final ArrayList<Task> tasks = inMemoryTaskManager.getAllTasks(Type.TASK);
+        final List<Task> tasks = inMemoryTaskManager.getAllTasks(Type.TASK);
         assertEquals(tasks, new ArrayList<>(),"Задачи не удалены!");
 
         inMemoryTaskManager.deleteAllTasks(Type.SUBTASK);
-        final ArrayList<Task> allSubtasks = inMemoryTaskManager.getAllTasks(Type.SUBTASK);
+        final List<Task> allSubtasks = inMemoryTaskManager.getAllTasks(Type.SUBTASK);
         assertEquals(allSubtasks, new ArrayList<>(),"Подзадачи не удалены!");
 
         inMemoryTaskManager.deleteAllTasks(Type.EPIC);
-        final ArrayList<Task> epicss = inMemoryTaskManager.getAllTasks(Type.EPIC);
+        final List<Task> epicss = inMemoryTaskManager.getAllTasks(Type.EPIC);
         assertEquals(epicss, new ArrayList<>(),"Эпики не удалены!");
     }
 
