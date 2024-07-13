@@ -40,29 +40,46 @@ public class Main {
         System.out.println(inMemoryTaskManager.updateTask(new Epic(epic1.getId(),"Продать квартиру быстро", "продать квартиру через Агенство", Status.DONE)));
         System.out.println("---GET_BY_ID---");
         System.out.println ("id 4 :"+ inMemoryTaskManager.getById(4));
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         System.out.println ("id 2 :"+ inMemoryTaskManager.getById(2));
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         System.out.println ("id 6 :"+ inMemoryTaskManager.getById(6));
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         System.out.println ("id 2 :"+ inMemoryTaskManager.getById(2));
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         System.out.println ("id 3 :"+ inMemoryTaskManager.getById(3));
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         System.out.println ("id 4 :"+ inMemoryTaskManager.getById(4));
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         System.out.println ("id 4 :"+ inMemoryTaskManager.getById(4));
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         System.out.println ("id 1 :"+ inMemoryTaskManager.getById(1));
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         System.out.println ("id 5 :"+ inMemoryTaskManager.getById(5));
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         System.out.println ("id 1 :"+ inMemoryTaskManager.getById(1));
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         System.out.println ("id 2 :"+ inMemoryTaskManager.getById(2));
         System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         System.out.println("---GET_SUBTASKS_BY_EPIC---");
         System.out.println ("Подзадачи "+epic2+" :"+ inMemoryTaskManager.getSubtaskByEpic(epic2));
         System.out.println("---DELETE_BY_ID---");
         inMemoryTaskManager.deleteById(1);
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         inMemoryTaskManager.deleteById(3);
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
         System.out.println("---DELETE_ALL_BY_TYPE---");
         System.out.println("TASK");
         inMemoryTaskManager.deleteAllTasks(Type.TASK);
-        System.out.println("EPIC");
-        inMemoryTaskManager.deleteAllTasks(Type.EPIC);
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
+
         System.out.println("SUBTASK");
         inMemoryTaskManager.deleteAllTasks(Type.SUBTASK);
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
+
+        System.out.println("EPIC");
+        inMemoryTaskManager.deleteAllTasks(Type.EPIC);
+        System.out.println ("История :"+ inMemoryHistoryManager.getHistory());
 
     }
 }

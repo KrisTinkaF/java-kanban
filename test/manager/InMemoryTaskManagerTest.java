@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import model.*;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ class InMemoryTaskManagerTest {
 
     final static TaskManager inMemoryTaskManager = Managers.getDefault();
     //final HistoryManager inMemoryHistoryManager = InMemoryTaskManager.inMemoryHistoryManager;
-    final HistoryManager inMemoryHistoryManager = inMemoryTaskManager.getInMemoryHistoryManager();
+    static final HistoryManager inMemoryHistoryManager = inMemoryTaskManager.getInMemoryHistoryManager();
     @BeforeAll
     static void beforeAll() {
         Task task = inMemoryTaskManager.createTask(new Task("Test Task", "Test Task desc"));
@@ -102,11 +103,20 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void deleteTask() {
+    void getHistory() {
+        final List<Task> history = inMemoryHistoryManager.getHistory();
+        assertNotEquals(history, new ArrayList<>(),"История пустая.");
+        System.out.println("history "+ history);
+        assertEquals(6, history.size(), "История не пустая.");
+    }
+    @AfterAll
+    static void afterAll() {
 
         inMemoryTaskManager.deleteById(3); //Удаляем подзадачу
         Epic epic = (Epic) inMemoryTaskManager.getById(2);
         assertEquals(Status.NEW, epic.getStatus(), "Статус эпика не изменился, хотя подзадача удалена!");
+        final List<Task> historyAfterDelete = inMemoryHistoryManager.getHistory();
+        assertEquals(5, historyAfterDelete.size(), "Размер истории не соответствует ожидаемому");
 
         inMemoryTaskManager.deleteById(2); //Удаляем эпик
         List<Subtask> subtasks = inMemoryTaskManager.getSubtaskByEpic(epic);
@@ -125,12 +135,5 @@ class InMemoryTaskManagerTest {
         assertEquals(epicss, new ArrayList<>(),"Эпики не удалены!");
     }
 
-    @Test
-    void getHistory() {
-        final LinkedList<Task> history = inMemoryHistoryManager.getHistory();
-        assertNotEquals(history, new LinkedList<>(),"История пустая.");
-        System.out.println("history "+ history);
-        assertEquals(8, history.size(), "История не пустая.");
-    }
 
 }

@@ -60,6 +60,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
         for (int taskId : allTasksId) {
+            inMemoryHistoryManager.remove(taskId);
             tasks.remove(taskId);
         }
         System.out.println("Все задачи с типом "+ type +" удалены. Сейчас в коллекции: " + tasks.values());
@@ -68,6 +69,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getById(int id) {
         inMemoryHistoryManager.add(tasks.get(id));
+        System.out.println("В историю добавлена таска "+ id);
         return tasks.get(id);
     }
 
@@ -83,12 +85,13 @@ public class InMemoryTaskManager implements TaskManager {
             List<Subtask> subtasks = getSubtaskByEpic(epic);
             for (Subtask subtask : subtasks) {
                 tasks.remove(subtask.getId());
+                inMemoryHistoryManager.remove(subtask.getId());
             }
             tasks.remove(id);
         } else {
             tasks.remove(id);
         }
-
+        inMemoryHistoryManager.remove(id);
         System.out.println("Удалена задача с id "+id+ ". Сейчас в коллекции: " + tasks.values());
     }
 
