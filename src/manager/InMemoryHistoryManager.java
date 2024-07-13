@@ -5,7 +5,7 @@ import model.Task;
 
 import java.util.*;
 
-public class InMemoryHistoryManager implements HistoryManager{
+public class InMemoryHistoryManager implements HistoryManager {
     private Node<Task> head;
     private Node<Task> tail;
     private final Map<Integer, Node<Task>> viewsHistory = new HashMap<>();
@@ -16,10 +16,10 @@ public class InMemoryHistoryManager implements HistoryManager{
         int taskId = task.getId();
         if (viewsHistory.containsKey(taskId)) {
             removeNode(viewsHistory.get(taskId));
-            System.out.println("Удалена из истории таска "+taskId);
+            System.out.println("Удалена из истории таска " + taskId);
         }
-            linkLast(task);
-            viewsHistory.put(taskId, tail);
+        linkLast(task);
+        viewsHistory.put(taskId, tail);
 
     }
 
@@ -65,12 +65,17 @@ public class InMemoryHistoryManager implements HistoryManager{
     }
 
     @Override
+    public void clearHistory() {
+        viewsHistory.clear();
+    }
+
+    @Override
     public List<Task> getHistory() {
         return getTasks();
     }
 
-    private ArrayList<Task> getTasks() {
-        ArrayList<Task> tasks = new ArrayList<>();
+    private List<Task> getTasks() {
+        List<Task> tasks = new ArrayList<>();
         if (head != null) {
             Node<Task> currentNode = head;
             tasks.add(currentNode.data);

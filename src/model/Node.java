@@ -2,7 +2,7 @@ package model;
 
 import java.util.Objects;
 
-public class Node <T> {
+public class Node<T> {
     public T data;
     public Node<T> next;
     public Node<T> prev;

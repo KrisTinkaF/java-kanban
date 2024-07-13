@@ -12,17 +12,17 @@ public interface TaskManager {
 
     List<Task> getAllTasks(Type type);
 
+    List<Task> getAll();
+
     void deleteAllTasks(Type type);
+
+    void deleteAll();
 
     Task getById(int id);
 
     void deleteById(int id);
 
     Task updateTask (Task task);
-
-    //Subtask updateSubtask(Subtask subtask);
-
-    //Epic updateEpic(Epic epic);
 
     List<Subtask> getSubtaskByEpic(Task epic);
 

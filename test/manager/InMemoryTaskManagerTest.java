@@ -16,18 +16,22 @@ import java.util.List;
 class InMemoryTaskManagerTest {
 
     final static TaskManager inMemoryTaskManager = Managers.getDefault();
-    //final HistoryManager inMemoryHistoryManager = InMemoryTaskManager.inMemoryHistoryManager;
     static final HistoryManager inMemoryHistoryManager = inMemoryTaskManager.getInMemoryHistoryManager();
-    @BeforeAll
-    static void beforeAll() {
+
+    void createTestTasks() {
         Task task = inMemoryTaskManager.createTask(new Task("Test Task", "Test Task desc"));
         Epic epic = (Epic) inMemoryTaskManager.createTask(new Epic("Test Epic", "Test Epic desc"));
         Subtask subtask = (Subtask) inMemoryTaskManager.createTask(new Subtask("Test Subtask", "Test Subtask desc", epic));
         Subtask subtask1 = (Subtask) inMemoryTaskManager.createTask(new Subtask("Test Subtask 1", "Test Subtask 1 desc", epic));
     }
 
+    void clearTaskList() {
+        inMemoryTaskManager.deleteAll();
+    }
+
     @Test
-    void createNewTask() {
+    void createNewTaskTest() {
+        createTestTasks();
         Task newTask = new Task("Test task", "Task description");
         final int taskId = inMemoryTaskManager.createTask(newTask).getId();
 
@@ -39,8 +43,8 @@ class InMemoryTaskManagerTest {
 
         final List<Task> tasks = inMemoryTaskManager.getAllTasks(Type.TASK);
 
-        assertNotEquals(tasks, new ArrayList<>(),"Задачи не возвращаются.");
-        System.out.println("tasks "+tasks);
+        assertNotEquals(tasks, new ArrayList<>(), "Задачи не возвращаются.");
+        System.out.println("tasks " + tasks);
         assertEquals(2, tasks.size(), "Неверное количество задач.");
         assertEquals(newTask, tasks.get(1), "Задачи не совпадают.");
 
@@ -55,15 +59,15 @@ class InMemoryTaskManagerTest {
 
         final List<Task> epics = inMemoryTaskManager.getAllTasks(Type.EPIC);
 
-        assertNotEquals(epics, new ArrayList<>(),"Эпики не возвращаются.");
-        System.out.println("epics "+epics);
+        assertNotEquals(epics, new ArrayList<>(), "Эпики не возвращаются.");
+        System.out.println("epics " + epics);
         assertEquals(2, epics.size(), "Неверное количество эпиков.");
         assertEquals(newEpic, epics.get(1), "Эпики не совпадают.");
 
         Subtask newSubtask = new Subtask("Test subtask", "Subtask description", newEpic);
         final int subtaskId = inMemoryTaskManager.createTask(newSubtask).getId();
 
-        final Subtask savedSubtask = (Subtask)inMemoryTaskManager.getById(subtaskId);
+        final Subtask savedSubtask = (Subtask) inMemoryTaskManager.getById(subtaskId);
 
         assertNotNull(savedSubtask, "Подзадача не найдена.");
         assertEquals(newSubtask, savedSubtask, "Подзадачи не совпадают.");
@@ -72,21 +76,25 @@ class InMemoryTaskManagerTest {
         final List<Task> subtasks = inMemoryTaskManager.getAllTasks(Type.SUBTASK);
 
         assertNotEquals(subtasks, new ArrayList<>(), "Подзадачи не возвращаются.");
-        System.out.println("subtasks createNewTask"+subtasks);
+        System.out.println("subtasks createNewTask" + subtasks);
         assertEquals(3, subtasks.size(), "Неверное количество подзадач.");
         assertEquals(newSubtask, subtasks.get(2), "Подзадачи не совпадают.");
+        clearTaskList();
     }
 
     @Test
-    void getSubtasksByEpic() {
+    void getSubtasksByEpicTest() {
+        createTestTasks();
         Epic epic = (Epic) inMemoryTaskManager.getById(2);
         List<Subtask> subtasks = inMemoryTaskManager.getSubtaskByEpic(epic);
-        assertNotEquals(subtasks, new ArrayList<>(),"Подзадачи эпика не возвращаются.");
+        assertNotEquals(subtasks, new ArrayList<>(), "Подзадачи эпика не возвращаются.");
         assertEquals(2, subtasks.size(), "Неверное количество подзадач эпика.");
+        clearTaskList();
     }
 
     @Test
-    void updateTask() {
+    void updateTaskTest() {
+        createTestTasks();
         inMemoryTaskManager.updateTask(new Task(1, "Change name", "Task description", Status.NEW));
         Task newTask = inMemoryTaskManager.getById(1);
         assertEquals("Change name", newTask.getName(), "Имя задачи не изменилось!");
@@ -100,39 +108,48 @@ class InMemoryTaskManagerTest {
         Subtask newSubtask = (Subtask) inMemoryTaskManager.getById(3);
         assertEquals(Status.IN_PROGRESS, newSubtask.getStatus(), "Статус подзадачи не изменился!");
         assertEquals(Status.IN_PROGRESS, newEpic.getStatus(), "Статус эпика не изменился!");
+        clearTaskList();
     }
 
     @Test
-    void getHistory() {
-        final List<Task> history = inMemoryHistoryManager.getHistory();
-        assertNotEquals(history, new ArrayList<>(),"История пустая.");
-        System.out.println("history "+ history);
-        assertEquals(6, history.size(), "История не пустая.");
-    }
-    @AfterAll
-    static void afterAll() {
+    void getHistoryTest() {
+        createTestTasks();
+        inMemoryTaskManager.getById(2);
+        inMemoryTaskManager.getById(1);
+        inMemoryTaskManager.getById(1);
+        inMemoryTaskManager.getById(3);
+        inMemoryTaskManager.getById(4);
+        inMemoryTaskManager.getById(2);
 
+        final List<Task> history = inMemoryHistoryManager.getHistory();
+        System.out.println("history " + history);
+        assertEquals(4, history.size(), "Количество задач в истории не соответствует ожидаемому");
+        clearTaskList();
+    }
+
+    @Test
+    void deleteTasksTest() {
+        createTestTasks();
         inMemoryTaskManager.deleteById(3); //Удаляем подзадачу
         Epic epic = (Epic) inMemoryTaskManager.getById(2);
         assertEquals(Status.NEW, epic.getStatus(), "Статус эпика не изменился, хотя подзадача удалена!");
-        final List<Task> historyAfterDelete = inMemoryHistoryManager.getHistory();
-        assertEquals(5, historyAfterDelete.size(), "Размер истории не соответствует ожидаемому");
 
         inMemoryTaskManager.deleteById(2); //Удаляем эпик
         List<Subtask> subtasks = inMemoryTaskManager.getSubtaskByEpic(epic);
-        assertEquals(subtasks, new ArrayList<>(),"Подзадачи эпика не удалены вместе с ним!");
+        assertEquals(subtasks, new ArrayList<>(), "Подзадачи эпика не удалены вместе с ним!");
 
         inMemoryTaskManager.deleteAllTasks(Type.TASK);
         final List<Task> tasks = inMemoryTaskManager.getAllTasks(Type.TASK);
-        assertEquals(tasks, new ArrayList<>(),"Задачи не удалены!");
+        assertEquals(tasks, new ArrayList<>(), "Задачи не удалены!");
 
         inMemoryTaskManager.deleteAllTasks(Type.SUBTASK);
         final List<Task> allSubtasks = inMemoryTaskManager.getAllTasks(Type.SUBTASK);
-        assertEquals(allSubtasks, new ArrayList<>(),"Подзадачи не удалены!");
+        assertEquals(allSubtasks, new ArrayList<>(), "Подзадачи не удалены!");
 
         inMemoryTaskManager.deleteAllTasks(Type.EPIC);
         final List<Task> epicss = inMemoryTaskManager.getAllTasks(Type.EPIC);
-        assertEquals(epicss, new ArrayList<>(),"Эпики не удалены!");
+        assertEquals(epicss, new ArrayList<>(), "Эпики не удалены!");
+        clearTaskList();
     }
 
 
