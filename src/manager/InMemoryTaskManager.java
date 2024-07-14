@@ -8,6 +8,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     public InMemoryTaskManager(HistoryManager inMemoryHistoryManager) {
         InMemoryTaskManager.inMemoryHistoryManager = inMemoryHistoryManager;
+        InMemoryTaskManager.counter = 0;
     }
 
     public HistoryManager getInMemoryHistoryManager() {
@@ -16,7 +17,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     private static HistoryManager inMemoryHistoryManager;
 
-    private static int counter = 0;
+    private static int counter;
 
     private final Map<Integer, Task> tasks = new HashMap<>();
 
