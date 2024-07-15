@@ -6,12 +6,13 @@ public class Subtask extends Task {
     }
 
     private Epic parent;
+
     public Subtask(int id, String name, String description, Status status, Epic parent) {
         super(id, name, description, status);
         this.parent = parent;
     }
 
-    public Subtask( String name, String description, Epic parent) {
+    public Subtask(String name, String description, Epic parent) {
         super(name, description);
         this.parent = parent;
     }
