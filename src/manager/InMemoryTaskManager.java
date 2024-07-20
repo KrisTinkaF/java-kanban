@@ -5,6 +5,8 @@ import model.*;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
+    public InMemoryTaskManager() {
+    }
 
     public InMemoryTaskManager(HistoryManager inMemoryHistoryManager) {
         InMemoryTaskManager.inMemoryHistoryManager = inMemoryHistoryManager;
@@ -19,12 +21,19 @@ public class InMemoryTaskManager implements TaskManager {
 
     private static int counter;
 
+
     private final Map<Integer, Task> tasks = new HashMap<>();
+
+
 
     @Override
     public Task createTask(Task task) {
-        counter++;
-        task.setId(counter);
+        if (task.getId() != 0) {
+            counter = task.getId();
+        } else {
+            counter++;
+            task.setId(counter);
+        }
         tasks.put(task.getId(), task);
         return task;
     }
