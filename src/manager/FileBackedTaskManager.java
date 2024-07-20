@@ -27,7 +27,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         fileBackedTaskManager.fromString(taskLine);
                     }
                 }
-            } catch (IOException | RuntimeException exception) {
+            } catch (IOException exception) {
                 throw new ManagerSaveException("Ошибка при чтении файла! " + exception.getMessage());
             }
         }
@@ -68,7 +68,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 fileWriter.write(task.toString() + "\n");
             }
 
-        } catch (IOException | RuntimeException exception) {
+        } catch (IOException exception) {
             throw new ManagerSaveException("Ошибка при сохранении задачи в файл! " + exception.getMessage());
         }
     }
