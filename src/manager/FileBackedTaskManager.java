@@ -24,11 +24,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 while (br.ready()) {
                     String taskLine = br.readLine();
                     if (taskLine != null) {
-                        Task task = fileBackedTaskManager.fromString(taskLine);
+                        fileBackedTaskManager.fromString(taskLine);
                     }
                 }
-            } catch (IOException exception) {
-                System.out.println("Не смогли прочесть файл: " + exception.getMessage());
+            } catch (IOException | RuntimeException exception) {
+                throw new ManagerSaveException("Ошибка при чтении файла! " + exception.getMessage());
             }
         }
         return fileBackedTaskManager;
@@ -37,46 +37,30 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     @Override
     public Task createTask(Task task) {
         task = super.createTask(task);
-        try {
-            save();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+        save();
         return task;
     }
 
     @Override
     public void deleteAllTasks(Type type) {
         super.deleteAllTasks(type);
-        try {
-            save();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+        save();
     }
 
     @Override
     public void deleteById(int id) {
         super.deleteById(id);
-        try {
-            save();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+        save();
     }
 
     @Override
     public Task updateTask(Task task) {
         task = super.updateTask(task);
-        try {
-            save();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+        save();
         return task;
     }
 
-    private void save() throws ManagerSaveException {
+    private void save() {
         List<Task> tasks = getAll();
         try (FileWriter fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
             fileWriter.write("id;type;name;description;status;epic\n");
@@ -84,8 +68,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 fileWriter.write(task.toString() + "\n");
             }
 
-        } catch (IOException exception) {
-            throw new ManagerSaveException("Ошибка при сохранении задачи в файл!");
+        } catch (IOException | RuntimeException exception) {
+            throw new ManagerSaveException("Ошибка при сохранении задачи в файл! " + exception.getMessage());
         }
     }
 
