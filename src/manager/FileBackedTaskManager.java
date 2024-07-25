@@ -20,18 +20,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public static FileBackedTaskManager loadFromFile(File file) {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
         //if (file.exists()) {
-            try (FileReader fileReader = new FileReader(file, StandardCharsets.UTF_8)) {
-                BufferedReader br = new BufferedReader(fileReader);
-                br.readLine();
-                while (br.ready()) {
-                    String taskLine = br.readLine();
-                    if (taskLine != null) {
-                        fileBackedTaskManager.fromString(taskLine);
-                    }
+        try (FileReader fileReader = new FileReader(file, StandardCharsets.UTF_8)) {
+            BufferedReader br = new BufferedReader(fileReader);
+            br.readLine();
+            while (br.ready()) {
+                String taskLine = br.readLine();
+                if (taskLine != null) {
+                    fileBackedTaskManager.fromString(taskLine);
                 }
-            } catch (IOException exception) {
-                throw new ManagerSaveException("Ошибка при чтении файла! " + exception.getMessage());
             }
+        } catch (IOException exception) {
+            throw new ManagerSaveException("Ошибка при чтении файла! " + exception.getMessage());
+        }
         //}
         return fileBackedTaskManager;
     }
@@ -84,11 +84,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
         switch (split[1]) {
             case "TASK":
-                Task task = new Task(Integer.parseInt(split[0]), split[2], split[3], convertStringToStatus(split[4]), start ,Duration.parse(split[6]));
+                Task task = new Task(Integer.parseInt(split[0]), split[2], split[3], convertStringToStatus(split[4]), start, Duration.parse(split[6]));
                 super.createTask(task);
                 return task;
             case "SUBTASK":
-                Subtask subtask = new Subtask(Integer.parseInt(split[0]), split[2], split[3], convertStringToStatus(split[4]), start, Duration.parse(split[6]) ,(Epic) getById(Integer.parseInt(split[5])));
+                Subtask subtask = new Subtask(Integer.parseInt(split[0]), split[2], split[3], convertStringToStatus(split[4]), start, Duration.parse(split[6]), (Epic) getById(Integer.parseInt(split[5])));
                 super.createTask(subtask);
                 return subtask;
             case "EPIC":
