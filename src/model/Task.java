@@ -1,5 +1,7 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -8,14 +10,35 @@ public class Task {
     private String description;
     private Status status;
 
-    public Task(int id, String name, String description, Status status) {
+    private Duration duration;
+
+    private LocalDateTime startTime;
+
+    public Task(int id, String name, String description, Status status, LocalDateTime startTime, Duration duration) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
+    public Task(String name, String description, LocalDateTime startTime, Duration duration) {
+        this.name = name;
+        this.description = description;
+        this.status = Status.NEW;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     public Task(String name, String description) {
+        this.name = name;
+        this.description = description;
+        this.status = Status.NEW;
+    }
+
+    public Task(int id, String name, String description) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.status = Status.NEW;
@@ -49,6 +72,27 @@ public class Task {
         return Type.TASK;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        LocalDateTime endtTime = startTime.plus(duration);
+        return endtTime;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) return true;
@@ -64,11 +108,16 @@ public class Task {
 
     @Override
     public String toString() {
+        if (duration == null) {
+            duration = Duration.ZERO;
+        }
         return id +
                 ";" + getType() +
                 ";" + name +
                 ";" + description +
                 ";" + status +
+                ";" + startTime +
+                ";" + duration +
                 ";";
 
     }

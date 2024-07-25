@@ -4,6 +4,8 @@ import model.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -17,7 +19,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public static FileBackedTaskManager loadFromFile(File file) {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
-        if (file.exists()) {
+        //if (file.exists()) {
             try (FileReader fileReader = new FileReader(file, StandardCharsets.UTF_8)) {
                 BufferedReader br = new BufferedReader(fileReader);
                 br.readLine();
@@ -30,7 +32,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             } catch (IOException exception) {
                 throw new ManagerSaveException("Ошибка при чтении файла! " + exception.getMessage());
             }
-        }
+        //}
         return fileBackedTaskManager;
     }
 
@@ -63,7 +65,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private void save() {
         List<Task> tasks = getAll();
         try (FileWriter fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
-            fileWriter.write("id;type;name;description;status;epic\n");
+            fileWriter.write("id;type;name;description;status;startTime;duration;epic\n");
             for (Task task : tasks) {
                 fileWriter.write(task.toString() + "\n");
             }
@@ -76,17 +78,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public Task fromString(String value) {
 
         String[] split = value.split(";");
+        LocalDateTime start = null;
+        if (!split[5].equals("null")) {
+            start = LocalDateTime.parse(split[5]);
+        }
         switch (split[1]) {
             case "TASK":
-                Task task = new Task(Integer.parseInt(split[0]), split[2], split[3], convertStringToStatus(split[4]));
+                Task task = new Task(Integer.parseInt(split[0]), split[2], split[3], convertStringToStatus(split[4]), start ,Duration.parse(split[6]));
                 super.createTask(task);
                 return task;
             case "SUBTASK":
-                Subtask subtask = new Subtask(Integer.parseInt(split[0]), split[2], split[3], convertStringToStatus(split[4]), (Epic) getById(Integer.parseInt(split[5])));
+                Subtask subtask = new Subtask(Integer.parseInt(split[0]), split[2], split[3], convertStringToStatus(split[4]), start, Duration.parse(split[6]) ,(Epic) getById(Integer.parseInt(split[5])));
                 super.createTask(subtask);
                 return subtask;
             case "EPIC":
-                Epic epic = new Epic(Integer.parseInt(split[0]), split[2], split[3], convertStringToStatus(split[4]));
+                Epic epic = new Epic(Integer.parseInt(split[0]), split[2], split[3], convertStringToStatus(split[4]), start, Duration.parse(split[6]));
                 super.createTask(epic);
                 return epic;
         }

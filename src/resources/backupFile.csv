@@ -1,2 +1,0 @@
-id;type;name;description;status;epic
-8;TASK;Проверка бэкапа;Если задача есть в файле backupFile, то все ок;NEW;

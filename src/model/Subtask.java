@@ -1,5 +1,8 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class Subtask extends Task {
     public Epic getParent() {
         return parent;
@@ -7,13 +10,13 @@ public class Subtask extends Task {
 
     private Epic parent;
 
-    public Subtask(int id, String name, String description, Status status, Epic parent) {
-        super(id, name, description, status);
+    public Subtask(int id, String name, String description, Status status, LocalDateTime startTime, Duration duration, Epic parent) {
+        super(id, name, description, status, startTime, duration);
         this.parent = parent;
     }
 
-    public Subtask(String name, String description, Epic parent) {
-        super(name, description);
+    public Subtask(String name, String description, LocalDateTime startTime, Duration duration, Epic parent) {
+        super(name, description, startTime, duration);
         this.parent = parent;
     }
 
