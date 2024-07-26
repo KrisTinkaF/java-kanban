@@ -192,6 +192,14 @@ class InMemoryTaskManagerTest {
         }, "Отсутствие файла должно приводить к ошибке!");
     }
 
+    @Test
+    public void testCrossTime() {
+        Task newTaskAfterStart = fileBackedTaskManager.createTask(new Task("New Task", "New Task desc", LocalDateTime.of(2024, 7,25, 22,0), Duration.ofMinutes(20))); // начало новой задачи пересекается с отрезком старой
+        assertFalse(fileBackedTaskManager.getAll().contains(newTaskAfterStart), "Задача добавлена несмотря на пересечение времени!");
+        Task newTaskBeforeEnd = fileBackedTaskManager.createTask(new Task("New Task", "New Task desc", LocalDateTime.of(2024, 7,25, 16,0), Duration.ofHours(6))); // конец новой задачи пересекается с отрезком старой
+        assertFalse(fileBackedTaskManager.getAll().contains(newTaskBeforeEnd), "Задача добавлена несмотря на пересечение времени!");
+    }
+
     @AfterEach
     void deleteBackupFile() {
         Path tempDir = Paths.get("test/testResources/");
@@ -199,7 +207,7 @@ class InMemoryTaskManagerTest {
         try (FileWriter fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
             fileWriter.write("");
         } catch (IOException exception) {
-            throw new ManagerSaveException("Ошибка при очистке тестового файла! " + exception.getMessage());
+
         }
     }
 

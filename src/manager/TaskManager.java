@@ -5,7 +5,7 @@ import model.Task;
 import model.Type;
 
 import java.util.List;
-import java.util.TreeSet;
+import java.util.Set;
 
 public interface TaskManager {
     Task createTask(Task task);
@@ -28,5 +28,6 @@ public interface TaskManager {
 
     HistoryManager getInMemoryHistoryManager();
 
-    TreeSet<Task> getPrioritizedTasks();
+    Set<Task> getPrioritizedTasks();
+
 }

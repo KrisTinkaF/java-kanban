@@ -26,7 +26,7 @@ public class InMemoryTaskManager implements TaskManager {
     Comparator<Task> comparator = Comparator.comparing(Task::getStartTime);
     private final Map<Integer, Task> tasks = new HashMap<>();
 
-    private final TreeSet<Task> sortedTasks = new TreeSet<>(comparator);
+    private final Set<Task> sortedTasks = new TreeSet<>(comparator);
 
 
     @Override
@@ -183,9 +183,12 @@ public class InMemoryTaskManager implements TaskManager {
         List<Subtask> allSubtasksByEpic = getSubtaskByEpic(epic);
 
         if (!allSubtasksByEpic.isEmpty()) {
-            Optional<Subtask> first = allSubtasksByEpic.stream().sorted(comparator).findFirst();
-            System.out.println("время первой сабтаски " + first.get().getStartTime());
-            epic.setStartTime(first.get().getStartTime());
+
+            allSubtasksByEpic.stream().sorted(comparator).findFirst().ifPresent( first -> {
+                System.out.println("время первой сабтаски " + first.getStartTime());
+                epic.setStartTime(first.getStartTime());
+                System.out.println("время эпика " + epic.getStartTime()); }
+            );
             addTask(epic);
         }
     }
@@ -216,7 +219,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public TreeSet<Task> getPrioritizedTasks() {
+    public Set<Task> getPrioritizedTasks() {
         return sortedTasks;
     }
 
@@ -224,18 +227,14 @@ public class InMemoryTaskManager implements TaskManager {
         if (task.getType() == Type.EPIC || task.getStartTime() == null) {
             tasks.put(task.getId(), task);
         } else {
-            try {
                 if (crossTime(task)) {
-                    throw new CrossTimeException("Задача пересекается по времени с дургими задачами. Она не будет создана или обновлена!" + task);
+                    System.out.println("Задача пересекается по времени с дургими задачами. Она не будет создана или обновлена!" + task);
                 } else {
                     if (task.getStartTime() != null) {
                         sortedTasks.add(task);
                     }
                     tasks.put(task.getId(), task);
                 }
-            } catch (Exception exception) {
-                System.out.println(exception.getMessage());
-            }
         }
 
     }
