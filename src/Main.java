@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws CrossTimeException {
 
         final TaskManager inMemoryTaskManager = Managers.getDefault();
         final HistoryManager inMemoryHistoryManager = inMemoryTaskManager.getInMemoryHistoryManager();

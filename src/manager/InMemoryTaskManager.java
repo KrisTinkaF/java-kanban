@@ -30,7 +30,7 @@ public class InMemoryTaskManager implements TaskManager {
 
 
     @Override
-    public Task createTask(Task task) {
+    public Task createTask(Task task) throws CrossTimeException {
         if (task.getId() != 0) {
             counter = task.getId();
         } else {
@@ -132,7 +132,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task updateTask(Task task) {
+    public Task updateTask(Task task) throws CrossTimeException {
         if (task.getType() == Type.EPIC) {
             Epic oldEpic = (Epic) tasks.get(task.getId());
             if (oldEpic.getStatus() != task.getStatus()) {
@@ -176,7 +176,7 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(Status.NEW);
         }
-        addTask(epic);
+        tasks.put(epic.getId(), epic);
     }
 
     public void updateEpicStartTime(Epic epic) {
@@ -190,7 +190,7 @@ public class InMemoryTaskManager implements TaskManager {
                         System.out.println("время эпика " + epic.getStartTime());
                     }
             );
-            addTask(epic);
+            tasks.put(epic.getId(), epic);
         }
     }
 
@@ -202,7 +202,7 @@ public class InMemoryTaskManager implements TaskManager {
                 sum = sum.plus(sub.getDuration());
             }
             epic.setDuration(sum);
-            addTask(epic);
+            tasks.put(epic.getId(), epic);
         }
     }
 
@@ -224,7 +224,7 @@ public class InMemoryTaskManager implements TaskManager {
         return sortedTasks;
     }
 
-    private void addTask(Task task) {
+    private void addTask(Task task) throws CrossTimeException {
         if (task.getType() == Type.EPIC || task.getStartTime() == null) {
             tasks.put(task.getId(), task);
         } else {
