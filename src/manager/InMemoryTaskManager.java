@@ -228,17 +228,13 @@ public class InMemoryTaskManager implements TaskManager {
         if (task.getType() == Type.EPIC || task.getStartTime() == null) {
             tasks.put(task.getId(), task);
         } else {
-            try {
-                if (crossTime(task)) {
-                    throw new CrossTimeException("Задача пересекается по времени с дургими задачами. Она не будет создана или обновлена!" + task);
-                } else {
-                    if (task.getStartTime() != null) {
-                        sortedTasks.add(task);
-                    }
-                    tasks.put(task.getId(), task);
+            if (crossTime(task)) {
+                throw new CrossTimeException("Задача пересекается по времени с дургими задачами. Она не будет создана или обновлена!" + task);
+            } else {
+                if (task.getStartTime() != null) {
+                    sortedTasks.add(task);
                 }
-            } catch (Exception exception) {
-                System.out.println(exception.getMessage());
+                tasks.put(task.getId(), task);
             }
         }
 
