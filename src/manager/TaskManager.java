@@ -30,4 +30,6 @@ public interface TaskManager {
 
     Set<Task> getPrioritizedTasks();
 
+    boolean crossTime(Task newTask);
+
 }

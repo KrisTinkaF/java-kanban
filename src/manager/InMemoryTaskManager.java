@@ -227,14 +227,18 @@ public class InMemoryTaskManager implements TaskManager {
         if (task.getType() == Type.EPIC || task.getStartTime() == null) {
             tasks.put(task.getId(), task);
         } else {
+            try {
                 if (crossTime(task)) {
-                    System.out.println("Задача пересекается по времени с дургими задачами. Она не будет создана или обновлена!" + task);
+                    throw new CrossTimeException("Задача пересекается по времени с дургими задачами. Она не будет создана или обновлена!" + task);
                 } else {
                     if (task.getStartTime() != null) {
                         sortedTasks.add(task);
                     }
                     tasks.put(task.getId(), task);
                 }
+            } catch (Exception exception) {
+                System.out.println(exception.getMessage());
+            }
         }
 
     }
@@ -246,11 +250,16 @@ public class InMemoryTaskManager implements TaskManager {
         tasks.remove(task.getId());
     }
 
-    private boolean crossTime(Task newTask) {
+    public boolean crossTime(Task newTask) {
         LocalDateTime start = newTask.getStartTime();
         LocalDateTime end = newTask.getEndTime();
         System.out.println("Отсрортированные таски " + getPrioritizedTasks());
-        return getPrioritizedTasks().stream().anyMatch(task -> (start.isAfter(task.getStartTime()) && start.isBefore(task.getEndTime())) || (end.isAfter(task.getStartTime()) && end.isBefore(task.getEndTime())));
+        return getPrioritizedTasks().stream().anyMatch(task -> isCross(start, end, task));
+    }
+
+    private boolean isCross(LocalDateTime start, LocalDateTime end, Task task) {
+        return (start.isAfter(task.getStartTime()) && start.isBefore(task.getEndTime()))
+                || (end.isAfter(task.getStartTime()) && end.isBefore(task.getEndTime()));
     }
 
 }

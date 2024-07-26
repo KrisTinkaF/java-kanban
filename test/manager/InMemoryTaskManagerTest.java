@@ -194,20 +194,22 @@ class InMemoryTaskManagerTest {
 
     @Test
     public void testCrossTime() {
-        Task newTaskAfterStart = fileBackedTaskManager.createTask(new Task("New Task", "New Task desc", LocalDateTime.of(2024, 7,25, 22,0), Duration.ofMinutes(20))); // начало новой задачи пересекается с отрезком старой
-        assertFalse(fileBackedTaskManager.getAll().contains(newTaskAfterStart), "Задача добавлена несмотря на пересечение времени!");
-        Task newTaskBeforeEnd = fileBackedTaskManager.createTask(new Task("New Task", "New Task desc", LocalDateTime.of(2024, 7,25, 16,0), Duration.ofHours(6))); // конец новой задачи пересекается с отрезком старой
-        assertFalse(fileBackedTaskManager.getAll().contains(newTaskBeforeEnd), "Задача добавлена несмотря на пересечение времени!");
+        Task newTaskAfterStart = new Task("New Task", "New Task desc", LocalDateTime.of(2024, 7,25, 22,0), Duration.ofMinutes(20)); // начало новой задачи пересекается с отрезком старой
+        assertTrue(fileBackedTaskManager.crossTime(newTaskAfterStart), "Пропустили перекрест времени!");
+        Task newTaskBeforeEnd = new Task("New Task", "New Task desc", LocalDateTime.of(2024, 7,25, 16,0), Duration.ofHours(6)); // конец новой задачи пересекается с отрезком старой
+        assertTrue(fileBackedTaskManager.crossTime(newTaskBeforeEnd), "Пропустили перекрест времени!");
+        Task newTaskAfterStartAndBeforeEnd = new Task("New Task", "New Task desc", LocalDateTime.of(2024, 7,25, 22,0), Duration.ofMinutes(6)); // и начало и конец новой задачи пересекаются с отрезком старой
+        assertTrue(fileBackedTaskManager.crossTime(newTaskAfterStartAndBeforeEnd), "Пропустили перекрест времени!");
+        Task newTaskDoNotCross = new Task("New Task", "New Task desc", LocalDateTime.of(2024, 7,25, 23,30), Duration.ofMinutes(30)); // новой задача не пересекается по времени со старыми
+        assertFalse(fileBackedTaskManager.crossTime(newTaskDoNotCross), "Не должно быть пересечения");
     }
 
     @AfterEach
-    void deleteBackupFile() {
+    void deleteBackupFile() throws IOException {
         Path tempDir = Paths.get("test/testResources/");
         File file = tempDir.resolve("backupFile.csv").toFile();
         try (FileWriter fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
             fileWriter.write("");
-        } catch (IOException exception) {
-
         }
     }
 
