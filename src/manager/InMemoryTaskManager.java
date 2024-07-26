@@ -184,10 +184,11 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (!allSubtasksByEpic.isEmpty()) {
 
-            allSubtasksByEpic.stream().sorted(comparator).findFirst().ifPresent( first -> {
-                System.out.println("время первой сабтаски " + first.getStartTime());
-                epic.setStartTime(first.getStartTime());
-                System.out.println("время эпика " + epic.getStartTime()); }
+            allSubtasksByEpic.stream().sorted(comparator).findFirst().ifPresent(first -> {
+                        System.out.println("время первой сабтаски " + first.getStartTime());
+                        epic.setStartTime(first.getStartTime());
+                        System.out.println("время эпика " + epic.getStartTime());
+                    }
             );
             addTask(epic);
         }
