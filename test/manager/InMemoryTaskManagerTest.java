@@ -9,8 +9,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,20 +27,20 @@ class InMemoryTaskManagerTest {
     private static TaskManager fileBackedTaskManager;
 
     @BeforeEach
-    void createTestTasks() {
+    void createTestTasks() throws CrossTimeException {
         inMemoryTaskManager = Managers.getDefault();
         inMemoryHistoryManager = inMemoryTaskManager.getInMemoryHistoryManager();
         fileBackedTaskManager = FileBackedTaskManager.loadFromFile(new File("test/testResources/backupFile.csv"));
-        Task task = fileBackedTaskManager.createTask(new Task("Test Task", "Test Task desc"));
+        Task task = fileBackedTaskManager.createTask(new Task("Test Task", "Test Task desc", LocalDateTime.of(2024, 7, 25, 21, 54), Duration.ofMinutes(20)));
         Epic epic = (Epic) fileBackedTaskManager.createTask(new Epic("Test Epic", "Test Epic desc"));
-        Subtask subtask = (Subtask) fileBackedTaskManager.createTask(new Subtask("Test Subtask", "Test Subtask desc", epic));
-        Subtask subtask1 = (Subtask) fileBackedTaskManager.createTask(new Subtask("Test Subtask 1", "Test Subtask 1 desc", epic));
+        Subtask subtask = (Subtask) fileBackedTaskManager.createTask(new Subtask("Test Subtask", "Test Subtask desc", LocalDateTime.of(2024, 7, 28, 15, 30), Duration.ofHours(15), epic));
+        Subtask subtask1 = (Subtask) fileBackedTaskManager.createTask(new Subtask("Test Subtask 1", "Test Subtask 1 desc", LocalDateTime.of(2024, 7, 30, 9, 15), Duration.ofMinutes(120), epic));
     }
 
 
     @Test
-    void createNewTaskTest() {
-        Task newTask = new Task("Test task", "Task description");
+    void createNewTaskTest() throws CrossTimeException {
+        Task newTask = new Task("Test Task", "Test Task desc", LocalDateTime.of(2024, 7, 25, 21, 54), Duration.ofMinutes(20));
         final int taskId = fileBackedTaskManager.createTask(newTask).getId();
 
         final Task savedTask = fileBackedTaskManager.getById(taskId);
@@ -67,7 +72,7 @@ class InMemoryTaskManagerTest {
         assertEquals(2, epics.size(), "Неверное количество эпиков.");
         assertEquals(newEpic, epics.get(1), "Эпики не совпадают.");
 
-        Subtask newSubtask = new Subtask("Test subtask", "Subtask description", newEpic);
+        Subtask newSubtask = new Subtask("Test Subtask", "Test Subtask desc", LocalDateTime.of(2024, 7, 28, 15, 30), Duration.ofHours(15), newEpic);
         final int subtaskId = fileBackedTaskManager.createTask(newSubtask).getId();
 
         final Subtask savedSubtask = (Subtask) fileBackedTaskManager.getById(subtaskId);
@@ -93,19 +98,39 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void updateTaskTest() {
-        fileBackedTaskManager.updateTask(new Task(1, "Change name", "Task description", Status.NEW));
+    void updateTaskTest() throws CrossTimeException {
+        fileBackedTaskManager.updateTask(new Task(1, "Change name", "Task description", Status.NEW, LocalDateTime.of(2024, 7, 31, 21, 54), Duration.ofMinutes(20)));
         Task newTask = fileBackedTaskManager.getById(1);
         assertEquals("Change name", newTask.getName(), "Имя задачи не изменилось!");
 
-        fileBackedTaskManager.updateTask(new Epic(2, "Test epic", "new desc", Status.IN_PROGRESS));
+        fileBackedTaskManager.updateTask(new Epic(2, "Test epic", "new desc", Status.IN_PROGRESS, LocalDateTime.of(2024, 7, 30, 9, 15), Duration.ofMinutes(120)));
         Epic newEpic = (Epic) fileBackedTaskManager.getById(2);
         assertEquals("new desc", newEpic.getDescription(), "Описание задачи не изменилось!");
         assertEquals(Status.NEW, newEpic.getStatus(), "Удалось изменить статус!");
 
-        fileBackedTaskManager.updateTask(new Subtask(3, "Test subtask", "Subtask description", Status.IN_PROGRESS, newEpic));
+        fileBackedTaskManager.updateTask(new Subtask(3, "Test subtask", "Subtask description", Status.IN_PROGRESS, LocalDateTime.of(2024, 7, 28, 15, 30), Duration.ofHours(15), newEpic));
         Subtask newSubtask = (Subtask) fileBackedTaskManager.getById(3);
         assertEquals(Status.IN_PROGRESS, newSubtask.getStatus(), "Статус подзадачи не изменился!");
+        assertEquals(Status.IN_PROGRESS, newEpic.getStatus(), "Статус эпика не изменился!");
+
+        fileBackedTaskManager.updateTask(new Subtask(4, "Test Subtask 1", "Test Subtask 1 desc", Status.IN_PROGRESS, LocalDateTime.of(2024, 7, 30, 9, 15), Duration.ofMinutes(120), newEpic));
+        Subtask newSubtask2 = (Subtask) fileBackedTaskManager.getById(4);
+        assertEquals(Status.IN_PROGRESS, newSubtask2.getStatus(), "Статус подзадачи не изменился!");
+        assertEquals(Status.IN_PROGRESS, newEpic.getStatus(), "Неправильный статус эпика!");
+
+        fileBackedTaskManager.updateTask(new Subtask(3, "Test subtask", "Subtask description", Status.DONE, LocalDateTime.of(2024, 7, 28, 15, 30), Duration.ofHours(15), newEpic));
+        Subtask new2Subtask = (Subtask) fileBackedTaskManager.getById(3);
+        assertEquals(Status.DONE, new2Subtask.getStatus(), "Статус подзадачи не изменился!");
+        assertEquals(Status.IN_PROGRESS, newEpic.getStatus(), "Статус эпика не изменился!");
+
+        fileBackedTaskManager.updateTask(new Subtask(4, "Test Subtask 1", "Test Subtask 1 desc", Status.DONE, LocalDateTime.of(2024, 7, 30, 9, 15), Duration.ofMinutes(120), newEpic));
+        Subtask new2Subtask2 = (Subtask) fileBackedTaskManager.getById(4);
+        assertEquals(Status.DONE, new2Subtask2.getStatus(), "Статус подзадачи не изменился!");
+        assertEquals(Status.DONE, newEpic.getStatus(), "Неправильный статус эпика!");
+
+        fileBackedTaskManager.updateTask(new Subtask(3, "Test subtask", "Subtask description", Status.NEW, LocalDateTime.of(2024, 7, 28, 15, 30), Duration.ofHours(15), newEpic));
+        Subtask new3Subtask = (Subtask) fileBackedTaskManager.getById(3);
+        assertEquals(Status.NEW, new3Subtask.getStatus(), "Статус подзадачи не изменился!");
         assertEquals(Status.IN_PROGRESS, newEpic.getStatus(), "Статус эпика не изменился!");
     }
 
@@ -154,17 +179,38 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void restoreTaskTest() {
+    void restoreTaskTest() throws CrossTimeException {
         fileBackedTaskManager = FileBackedTaskManager.loadFromFile(new File("test/testResources/testRestore.csv"));
         final List<Task> tasks = fileBackedTaskManager.getAll();
         assertEquals(1, tasks.size(), "Колиечство задач не соответствует ожидаемому!");
     }
 
+    @Test
+    public void testManagerSaveException() {
+        assertThrows(ManagerSaveException.class, () -> {
+            fileBackedTaskManager = FileBackedTaskManager.loadFromFile(new File("test/testResources/backupFileTestException.csv"));
+        }, "Отсутствие файла должно приводить к ошибке!");
+    }
+
+    @Test
+    public void testCrossTime() {
+        Task newTaskAfterStart = new Task("New Task", "New Task desc", LocalDateTime.of(2024, 7, 25, 22, 0), Duration.ofMinutes(20)); // начало новой задачи пересекается с отрезком старой
+        assertTrue(fileBackedTaskManager.crossTime(newTaskAfterStart), "Пропустили перекрест времени!");
+        Task newTaskBeforeEnd = new Task("New Task", "New Task desc", LocalDateTime.of(2024, 7, 25, 16, 0), Duration.ofHours(6)); // конец новой задачи пересекается с отрезком старой
+        assertTrue(fileBackedTaskManager.crossTime(newTaskBeforeEnd), "Пропустили перекрест времени!");
+        Task newTaskAfterStartAndBeforeEnd = new Task("New Task", "New Task desc", LocalDateTime.of(2024, 7, 25, 22, 0), Duration.ofMinutes(6)); // и начало и конец новой задачи пересекаются с отрезком старой
+        assertTrue(fileBackedTaskManager.crossTime(newTaskAfterStartAndBeforeEnd), "Пропустили перекрест времени!");
+        Task newTaskDoNotCross = new Task("New Task", "New Task desc", LocalDateTime.of(2024, 7, 25, 23, 30), Duration.ofMinutes(30)); // новой задача не пересекается по времени со старыми
+        assertFalse(fileBackedTaskManager.crossTime(newTaskDoNotCross), "Не должно быть пересечения");
+    }
+
     @AfterEach
-    void deleteBackupFile() {
+    void deleteBackupFile() throws IOException {
         Path tempDir = Paths.get("test/testResources/");
         File file = tempDir.resolve("backupFile.csv").toFile();
-        file.delete();
+        try (FileWriter fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
+            fileWriter.write("");
+        }
     }
 
 }
