@@ -20,6 +20,7 @@ import java.util.Optional;
 
 public class BaseHttpHandler {
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    protected Gson gson = creteGson();
 
     protected void writeResponse(HttpExchange exchange,
                                  String responseString,
@@ -43,11 +44,6 @@ public class BaseHttpHandler {
 
         try {
             Task task = fileBackedTaskManager.getById(id);
-
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
-            gsonBuilder.setPrettyPrinting();
-            Gson gson = gsonBuilder.create();
             String response = gson.toJson(task);
             writeResponse(exchange, response, 200);
         } catch (NotFoundException e) {
@@ -57,19 +53,8 @@ public class BaseHttpHandler {
     }
 
     protected void handleGetTasks(TaskManager fileBackedTaskManager, HttpExchange exchange, Type type) throws IOException {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
-        gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
-        gsonBuilder.serializeNulls();
-        gsonBuilder.setPrettyPrinting();
-        Gson gson = gsonBuilder.create();
-
-        System.out.println(fileBackedTaskManager.getAllTasks(type));
-
         String tasks = gson.toJson(fileBackedTaskManager.getAllTasks(type));
-
         writeResponse(exchange, tasks, 200);
-
     }
 
 
@@ -97,6 +82,15 @@ public class BaseHttpHandler {
             writeResponse(exchange, type + " с id: " + id + " не найден!", 404);
         }
 
+    }
+
+    protected Gson creteGson() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
+        gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
+        gsonBuilder.serializeNulls();
+        gsonBuilder.setPrettyPrinting();
+        return gsonBuilder.create();
     }
 
     class TaskListTypeToken extends TypeToken<List<Task>> {

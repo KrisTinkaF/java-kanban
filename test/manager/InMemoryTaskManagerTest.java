@@ -21,14 +21,13 @@ import java.util.List;
 
 class InMemoryTaskManagerTest {
 
-    private static TaskManager inMemoryTaskManager;
-    private static HistoryManager inMemoryHistoryManager;
+    private HistoryManager inMemoryHistoryManager;
 
-    private static TaskManager fileBackedTaskManager;
+    private TaskManager fileBackedTaskManager;
 
     @BeforeEach
     void createTestTasks() throws CrossTimeException {
-        inMemoryTaskManager = Managers.getDefault();
+        TaskManager inMemoryTaskManager = Managers.getDefault();
         inMemoryHistoryManager = inMemoryTaskManager.getInMemoryHistoryManager();
         fileBackedTaskManager = FileBackedTaskManager.loadFromFile(new File("test/testResources/backupFile.csv"));
         Task task = fileBackedTaskManager.createTask(new Task("Test Task", "Test Task desc", LocalDateTime.of(2024, 7, 25, 21, 54), Duration.ofMinutes(20)));

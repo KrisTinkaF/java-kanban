@@ -1,21 +1,17 @@
 package api;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import manager.HistoryManager;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
 
 public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
     public HistoryHandler(HistoryManager inMemoryHistoryManager) {
-        HistoryHandler.inMemoryHistoryManager = inMemoryHistoryManager;
+        this.inMemoryHistoryManager = inMemoryHistoryManager;
     }
 
-    private static HistoryManager inMemoryHistoryManager;
+    private final HistoryManager inMemoryHistoryManager;
 
 
     @Override
@@ -35,14 +31,7 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
     }
 
     private void handleHistory(HttpExchange exchange) throws IOException {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
-        gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
-        gsonBuilder.setPrettyPrinting();
-        Gson gson = gsonBuilder.create();
-
         String tasks = gson.toJson(inMemoryHistoryManager.getHistory());
-
         writeResponse(exchange, tasks, 200);
     }
 

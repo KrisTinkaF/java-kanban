@@ -10,17 +10,14 @@ import model.Type;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.LocalDateTime;
 
 public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
-    public SubtaskHandler(TaskManager fileBackedTaskManager) {
-        SubtaskHandler.fileBackedTaskManager = fileBackedTaskManager;
+    public SubtaskHandler(TaskManager taskManager) {
+        this.taskManager = taskManager;
     }
 
-    private static TaskManager fileBackedTaskManager;
-
+    private final TaskManager taskManager;
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -28,11 +25,11 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
         switch (endpoint) {
             case GET_SUBTASK: {
-                handleGetTask(fileBackedTaskManager, exchange, Type.SUBTASK);
+                handleGetTask(taskManager, exchange, Type.SUBTASK);
                 break;
             }
             case GET_SUBTASKS: {
-                handleGetTasks(fileBackedTaskManager, exchange, Type.SUBTASK);
+                handleGetTasks(taskManager, exchange, Type.SUBTASK);
                 break;
             }
             case POST_SUBTASK: {
@@ -40,7 +37,7 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
                 break;
             }
             case DELETE_SUBTASK: {
-                handleDeleteTask(fileBackedTaskManager, exchange, Type.SUBTASK);
+                handleDeleteTask(taskManager, exchange, Type.SUBTASK);
                 break;
             }
             default:
@@ -62,13 +59,6 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
         }
         JsonObject jsonObject = jsonElement.getAsJsonObject();
 
-        boolean hasType = jsonObject.has("type");
-
-        if (!hasType) {
-            writeResponse(exchange, "Поле \"type\" обязательно!", 400);
-            return;
-        }
-
         boolean hasEpicId = jsonObject.has("parentId");
 
         if (!hasEpicId) {
@@ -78,22 +68,14 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
         boolean hasId = jsonObject.has("id");
         try {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
-            gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
-            Gson gson = gsonBuilder.create();
-
             Subtask subtask = gson.fromJson(body, Subtask.class);
-
             if (hasId) {
-                fileBackedTaskManager.updateTask(subtask);
+                taskManager.updateTask(subtask);
             } else {
-                fileBackedTaskManager.createTask(subtask);
+                taskManager.createTask(subtask);
             }
-
             String response = gson.toJson(subtask);
             writeResponse(exchange, response, 201);
-
         } catch (CrossTimeException e) {
             writeResponse(exchange, e.getMessage(), 404);
         } catch (Exception e) {

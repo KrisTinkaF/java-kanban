@@ -9,17 +9,15 @@ import model.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
-    public TaskHandler(TaskManager fileBackedTaskManager) {
-        TaskHandler.fileBackedTaskManager = fileBackedTaskManager;
+    public TaskHandler(TaskManager taskManager) {
+        this.taskManager = taskManager;
     }
 
-    private static TaskManager fileBackedTaskManager;
+    private final TaskManager taskManager;
 
 
     @Override
@@ -28,11 +26,11 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
         switch (endpoint) {
             case GET_TASK: {
-                handleGetTask(fileBackedTaskManager, exchange, Type.TASK);
+                handleGetTask(taskManager, exchange, Type.TASK);
                 break;
             }
             case GET_TASKS: {
-                handleGetTasks(fileBackedTaskManager, exchange, Type.TASK);
+                handleGetTasks(taskManager, exchange, Type.TASK);
                 break;
             }
             case POST_TASK: {
@@ -40,7 +38,7 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
                 break;
             }
             case DELETE_TASK: {
-                handleDeleteTask(fileBackedTaskManager, exchange, Type.TASK);
+                handleDeleteTask(taskManager, exchange, Type.TASK);
                 break;
             }
             default:
@@ -61,27 +59,14 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
             return;
         }
         JsonObject jsonObject = jsonElement.getAsJsonObject();
-
-        boolean hasType = jsonObject.has("type");
-
-        if (!hasType) {
-            writeResponse(exchange, "Поле \"type\" обязательно!", 400);
-            return;
-        }
-
         boolean hasId = jsonObject.has("id");
         try {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
-            gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
-            Gson gson = gsonBuilder.create();
-
             Task task = gson.fromJson(body, Task.class);
 
             if (hasId) {
-                fileBackedTaskManager.updateTask(task);
+                taskManager.updateTask(task);
             } else {
-                fileBackedTaskManager.createTask(task);
+                taskManager.createTask(task);
             }
 
             String response = gson.toJson(task);
@@ -96,7 +81,6 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
     private Endpoint getEndpoint(String requestPath, String requestMethod) {
         String[] pathParts = requestPath.split("/");
-
         if (requestMethod.equals("GET")) {
             if (pathParts[1].equals("tasks")) {
                 if (pathParts.length == 2) {
@@ -113,7 +97,6 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
         if (requestMethod.equals("DELETE") && pathParts[1].equals("tasks") && pathParts.length == 3) {
             return Endpoint.DELETE_TASK;
         }
-
         return Endpoint.UNKNOWN;
     }
 

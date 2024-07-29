@@ -8,21 +8,18 @@ import model.*;
 
 import java.io.IOException;
 
-import com.google.gson.Gson;
 import model.Type;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class EpicHandler extends BaseHttpHandler implements HttpHandler {
 
-    public EpicHandler(TaskManager fileBackedTaskManager) {
-        EpicHandler.fileBackedTaskManager = fileBackedTaskManager;
+    public EpicHandler(TaskManager taskManager) {
+        this.taskManager = taskManager;
     }
 
-    private static TaskManager fileBackedTaskManager;
+    private final TaskManager taskManager;
 
 
     @Override
@@ -31,11 +28,11 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
 
         switch (endpoint) {
             case GET_EPIC: {
-                handleGetTask(fileBackedTaskManager, exchange, Type.EPIC);
+                handleGetTask(taskManager, exchange, Type.EPIC);
                 break;
             }
             case GET_EPICS: {
-                handleGetTasks(fileBackedTaskManager, exchange, Type.EPIC);
+                handleGetTasks(taskManager, exchange, Type.EPIC);
                 break;
             }
             case POST_EPIC: {
@@ -43,7 +40,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
                 break;
             }
             case DELETE_EPIC: {
-                handleDeleteTask(fileBackedTaskManager, exchange, Type.EPIC);
+                handleDeleteTask(taskManager, exchange, Type.EPIC);
                 break;
             }
             case GET_EPICS_SUBTASKS: {
@@ -68,32 +65,16 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
             return;
         }
         JsonObject jsonObject = jsonElement.getAsJsonObject();
-
-        boolean hasType = jsonObject.has("type");
-
-        if (!hasType) {
-            writeResponse(exchange, "Поле \"type\" обязательно!", 400);
-            return;
-        }
-
         boolean hasId = jsonObject.has("id");
         try {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
-            gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
-            Gson gson = gsonBuilder.create();
-
             Epic epic = gson.fromJson(body, Epic.class);
-
             if (hasId) {
-                fileBackedTaskManager.updateTask(epic);
+                taskManager.updateTask(epic);
             } else {
-                fileBackedTaskManager.createTask(epic);
+                taskManager.createTask(epic);
             }
-
             String response = gson.toJson(epic);
             writeResponse(exchange, response, 201);
-
         } catch (CrossTimeException e) {
             writeResponse(exchange, e.getMessage(), 404);
         } catch (Exception e) {
@@ -103,22 +84,13 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleGetEpicSubtasks(HttpExchange exchange) throws IOException {
         Optional<Integer> epicId = getIdFromRequest(exchange);
-
         if (epicId.isEmpty()) {
             writeResponse(exchange, "Некорректный идентификатор", 400);
             return;
         }
         int id = epicId.get();
         try {
-
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
-            gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
-            gsonBuilder.setPrettyPrinting();
-            Gson gson = gsonBuilder.create();
-
-            String response = gson.toJson(fileBackedTaskManager.getSubtaskByEpic(id));
-
+            String response = gson.toJson(taskManager.getSubtaskByEpic(id));
             writeResponse(exchange, response, 200);
         } catch (NotFoundException e) {
             writeResponse(exchange, "Эпик с id: " + id + " не найден!", 404);

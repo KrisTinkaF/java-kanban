@@ -1,21 +1,17 @@
 package api;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import manager.TaskManager;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
 
 public class PriorityHandler extends BaseHttpHandler implements HttpHandler {
-    public PriorityHandler(TaskManager fileBackedTaskManager) {
-        PriorityHandler.fileBackedTaskManager = fileBackedTaskManager;
+    public PriorityHandler(TaskManager taskManager) {
+        this.taskManager = taskManager;
     }
 
-    private static TaskManager fileBackedTaskManager;
+    private final TaskManager taskManager;
 
 
     @Override
@@ -33,14 +29,7 @@ public class PriorityHandler extends BaseHttpHandler implements HttpHandler {
     }
 
     private void handlePriority(HttpExchange exchange) throws IOException {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
-        gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
-        gsonBuilder.setPrettyPrinting();
-        Gson gson = gsonBuilder.create();
-
-        String tasks = gson.toJson(fileBackedTaskManager.getPrioritizedTasks());
-
+        String tasks = gson.toJson(taskManager.getPrioritizedTasks());
         writeResponse(exchange, tasks, 200);
     }
 
