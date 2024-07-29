@@ -35,7 +35,7 @@ public class BaseHttpHandler {
     protected void handleGetTask(TaskManager fileBackedTaskManager, HttpExchange exchange, Type type) throws IOException {
 
         Optional<Integer> taskId = getIdFromRequest(exchange);
-        if(taskId.isEmpty()) {
+        if (taskId.isEmpty()) {
             writeResponse(exchange, "Некорректный идентификатор", 400);
             return;
         }
@@ -51,24 +51,24 @@ public class BaseHttpHandler {
             String response = gson.toJson(task);
             writeResponse(exchange, response, 200);
         } catch (NotFoundException e) {
-            writeResponse(exchange, type+" с id: "+ id +" не найден!", 404);
+            writeResponse(exchange, type + " с id: " + id + " не найден!", 404);
         }
 
     }
 
     protected void handleGetTasks(TaskManager fileBackedTaskManager, HttpExchange exchange, Type type) throws IOException {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
-            gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
-            gsonBuilder.serializeNulls();
-            gsonBuilder.setPrettyPrinting();
-            Gson gson = gsonBuilder.create();
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
+        gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
+        gsonBuilder.serializeNulls();
+        gsonBuilder.setPrettyPrinting();
+        Gson gson = gsonBuilder.create();
 
         System.out.println(fileBackedTaskManager.getAllTasks(type));
 
-            String tasks = gson.toJson(fileBackedTaskManager.getAllTasks(type));
+        String tasks = gson.toJson(fileBackedTaskManager.getAllTasks(type));
 
-            writeResponse(exchange, tasks, 200);
+        writeResponse(exchange, tasks, 200);
 
     }
 
@@ -84,7 +84,7 @@ public class BaseHttpHandler {
 
     protected void handleDeleteTask(TaskManager fileBackedTaskManager, HttpExchange exchange, Type type) throws IOException {
         Optional<Integer> taskId = getIdFromRequest(exchange);
-        if(taskId.isEmpty()) {
+        if (taskId.isEmpty()) {
             writeResponse(exchange, "Некорректный идентификатор", 400);
             return;
         }
@@ -92,9 +92,9 @@ public class BaseHttpHandler {
 
         try {
             fileBackedTaskManager.deleteById(id);
-            writeResponse(exchange, type+" успешно удален!", 200);
+            writeResponse(exchange, type + " успешно удален!", 200);
         } catch (NotFoundException e) {
-            writeResponse(exchange, type+" с id: "+ id +" не найден!", 404);
+            writeResponse(exchange, type + " с id: " + id + " не найден!", 404);
         }
 
     }
