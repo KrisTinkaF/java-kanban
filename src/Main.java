@@ -1,3 +1,4 @@
+import API.HttpTaskServer;
 import manager.*;
 import model.*;
 
@@ -19,15 +20,15 @@ public class Main {
         System.out.println(fileBackedTaskManager.createTask(task2));
         Epic epic1 = new Epic("Продать квартиру", "продать квартиру через Агенство");
         System.out.println(fileBackedTaskManager.createTask(epic1));
-        Subtask subtask11 = new Subtask("Заключить договор с Агентсвом", null, LocalDateTime.of(2024, 9,9,10,0), Duration.ofHours(3), epic1);
+        Subtask subtask11 = new Subtask("Заключить договор с Агентсвом", null, LocalDateTime.of(2024, 9,9,10,0), Duration.ofHours(3), epic1.getId());
         System.out.println(fileBackedTaskManager.createTask(subtask11));
         //System.out.println("Подзадача добавдена в эпик " + taskManager.getSubtaskByEpic(epic1));
         Epic epic2 = new Epic("Закрыть жесткий дедлайн", "Сдать все долги на ЯП");
         System.out.println(fileBackedTaskManager.createTask(epic2));
-        Subtask subtask21 = new Subtask("Сдать проектное задание по спринту 8", "Дописать проект и сдать на ревью", LocalDateTime.of(2024, 7,30,18,7), Duration.ofDays(1), epic2);
+        Subtask subtask21 = new Subtask("Сдать проектное задание по спринту 8", "Дописать проект и сдать на ревью", LocalDateTime.of(2024, 7,30,18,7), Duration.ofDays(1), epic2.getId());
         System.out.println(fileBackedTaskManager.createTask(subtask21));
         //System.out.println("Подзадача добавдена в эпик " + taskManager.getSubtaskByEpic(epic2));
-        Subtask subtask22 = new Subtask("Сдать проектное задание по спринту 9", "Изучить теорию и после выполнить проектное задание спринта 5", LocalDateTime.of(2024, 7,30,19,30), Duration.ofDays(3),epic2);
+        Subtask subtask22 = new Subtask("Сдать проектное задание по спринту 9", "Изучить теорию и после выполнить проектное задание спринта 5", LocalDateTime.of(2024, 7,30,19,30), Duration.ofDays(3),epic2.getId());
         System.out.println(fileBackedTaskManager.createTask(subtask22));
         //System.out.println("Подзадача добавдена в эпик " + taskManager.getSubtaskByEpic(epic2));
         System.out.println("---PRINT---");
@@ -41,13 +42,13 @@ public class Main {
         System.out.println("TASK");
         System.out.println(fileBackedTaskManager.updateTask(new Task(task1.getId(), "Купить продукты", "осталось купить только мясо", Status.IN_PROGRESS, LocalDateTime.of(2024, 7,26,19,30), Duration.ofDays(3))));
         System.out.println("SUBTASK");
-        System.out.println(fileBackedTaskManager.updateTask(new Subtask(subtask21.getId(), "Сдать проектное задание по спринту 4", "Дописать проект и сдать на ревью", Status.IN_PROGRESS, LocalDateTime.of(2024, 8,26,19,30), Duration.ofDays(3), epic2)));
+        System.out.println(fileBackedTaskManager.updateTask(new Subtask(subtask21.getId(), "Сдать проектное задание по спринту 4", "Дописать проект и сдать на ревью", Status.IN_PROGRESS, LocalDateTime.of(2024, 8,26,19,30), Duration.ofDays(3), epic2.getId())));
         System.out.println("EPIC");
         System.out.println(fileBackedTaskManager.updateTask(new Epic(epic1.getId(), "Продать квартиру быстро", "продать квартиру через Агенство")));
 
         //блок сработает только при первом запуске, далее задачи будут удалены, из бэкапа в том числе
 
-        /*System.out.println("---GET_BY_ID---");
+        System.out.println("---GET_BY_ID---");
         System.out.println("id 4 :" + fileBackedTaskManager.getById(4));
         System.out.println("История :" + inMemoryHistoryManager.getHistory());
         System.out.println("id 2 :" + fileBackedTaskManager.getById(2));
@@ -71,7 +72,7 @@ public class Main {
         System.out.println("id 2 :" + fileBackedTaskManager.getById(2));
         System.out.println("История :" + inMemoryHistoryManager.getHistory());
         System.out.println("---GET_SUBTASKS_BY_EPIC---");
-        System.out.println("Подзадачи " + epic2 + " :" + fileBackedTaskManager.getSubtaskByEpic(epic2));
+        System.out.println("Подзадачи " + epic2 + " :" + fileBackedTaskManager.getSubtaskByEpic(epic2.getId()));
 
         System.out.println("---DELETE_BY_ID---");
         fileBackedTaskManager.deleteById(1);
@@ -79,7 +80,7 @@ public class Main {
         fileBackedTaskManager.deleteById(3);
         System.out.println("История :" + inMemoryHistoryManager.getHistory());
 
-         */
+
         System.out.println("---DELETE_ALL_BY_TYPE---");
         System.out.println("TASK");
         fileBackedTaskManager.deleteAllTasks(Type.TASK);
