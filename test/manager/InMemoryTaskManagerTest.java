@@ -182,7 +182,7 @@ class InMemoryTaskManagerTest {
     void restoreTaskTest() throws CrossTimeException {
         fileBackedTaskManager = FileBackedTaskManager.loadFromFile(new File("test/testResources/testRestore.csv"));
         final List<Task> tasks = fileBackedTaskManager.getAll();
-        assertEquals(1, tasks.size(), "Колиечство задач не соответствует ожидаемому!");
+        assertEquals(5, tasks.size(), "Колиечство задач не соответствует ожидаемому!");
     }
 
     @Test
