@@ -1,4 +1,4 @@
-package HttpServer;
+package api;
 
 import com.sun.net.httpserver.HttpServer;
 import manager.HistoryManager;
