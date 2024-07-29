@@ -1,4 +1,4 @@
-package API;
+package HttpServer;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;

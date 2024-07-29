@@ -1,47 +1,45 @@
-package API;
+package HttpServer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import manager.HistoryManager;
+import manager.TaskManager;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
-    public HistoryHandler(HistoryManager inMemoryHistoryManager) {
-        HistoryHandler.inMemoryHistoryManager = inMemoryHistoryManager;
+public class PriorityHandler extends BaseHttpHandler implements HttpHandler {
+    public PriorityHandler(TaskManager fileBackedTaskManager) {
+        PriorityHandler.fileBackedTaskManager = fileBackedTaskManager;
     }
 
-    private static HistoryManager inMemoryHistoryManager;
+    private static TaskManager fileBackedTaskManager;
 
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-
         Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
 
         switch (endpoint) {
-            case HISTORY: {
-                handleHistory(exchange);
+            case PRIORITIZED: {
+                handlePriority(exchange);
                 break;
             }
             default:
                 writeResponse(exchange, "Такого эндпоинта не существует", 404);
         }
-
     }
 
-    private void handleHistory(HttpExchange exchange) throws IOException {
+    private void handlePriority(HttpExchange exchange) throws IOException {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
         gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
         gsonBuilder.setPrettyPrinting();
         Gson gson = gsonBuilder.create();
 
-        String tasks = gson.toJson(inMemoryHistoryManager.getHistory());
+        String tasks = gson.toJson(fileBackedTaskManager.getPrioritizedTasks());
 
         writeResponse(exchange, tasks, 200);
     }
@@ -50,9 +48,9 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
         String[] pathParts = requestPath.split("/");
 
         if (requestMethod.equals("GET")) {
-            if (pathParts[1].equals("history")) {
+            if (pathParts[1].equals("prioritized")) {
                 if (pathParts.length == 2) {
-                    return Endpoint.HISTORY;
+                    return Endpoint.PRIORITIZED;
                 }
             }
         }

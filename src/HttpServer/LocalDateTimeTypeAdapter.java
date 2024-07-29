@@ -1,4 +1,4 @@
-package API;
+package HttpServer;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;

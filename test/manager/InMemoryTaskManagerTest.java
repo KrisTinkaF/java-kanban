@@ -3,8 +3,6 @@ package manager;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import API.HttpTaskServer;
-import com.sun.net.httpserver.HttpServer;
 import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

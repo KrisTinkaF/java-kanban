@@ -1,26 +1,22 @@
-package API;
+package HttpServer;
 
 import com.google.gson.*;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import manager.TaskManager;
-import model.*;
-
-import java.io.IOException;
-
-import com.google.gson.Gson;
+import model.CrossTimeException;
+import model.Subtask;
 import model.Type;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
-public class EpicHandler extends BaseHttpHandler implements HttpHandler {
+public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
-    public EpicHandler(TaskManager fileBackedTaskManager) {
-        EpicHandler.fileBackedTaskManager = fileBackedTaskManager;
+    public SubtaskHandler(TaskManager fileBackedTaskManager) {
+        SubtaskHandler.fileBackedTaskManager = fileBackedTaskManager;
     }
 
     private static TaskManager fileBackedTaskManager;
@@ -31,24 +27,20 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
 
         switch (endpoint) {
-            case GET_EPIC: {
-                handleGetTask(fileBackedTaskManager, exchange, Type.EPIC);
+            case GET_SUBTASK: {
+                handleGetTask(fileBackedTaskManager, exchange, Type.SUBTASK);
                 break;
             }
-            case GET_EPICS: {
-                handleGetTasks(fileBackedTaskManager, exchange, Type.EPIC);
+            case GET_SUBTASKS: {
+                handleGetTasks(fileBackedTaskManager, exchange, Type.SUBTASK);
                 break;
             }
-            case POST_EPIC: {
-                handlePostEpic(exchange);
+            case POST_SUBTASK: {
+                handlePostSubtask(exchange);
                 break;
             }
-            case DELETE_EPIC: {
-                handleDeleteTask(fileBackedTaskManager, exchange, Type.EPIC);
-                break;
-            }
-            case GET_EPICS_SUBTASKS: {
-                handleGetEpicSubtasks(exchange);
+            case DELETE_SUBTASK: {
+                handleDeleteTask(fileBackedTaskManager, exchange, Type.SUBTASK);
                 break;
             }
             default:
@@ -56,7 +48,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         }
     }
 
-    private void handlePostEpic(HttpExchange exchange) throws IOException {
+    private void handlePostSubtask(HttpExchange exchange) throws IOException {
 
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         if (body.isEmpty()) {
@@ -77,6 +69,13 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
             return;
         }
 
+        boolean hasEpicId = jsonObject.has("parentId");
+
+        if (!hasEpicId) {
+            writeResponse(exchange, "Поле \"parentId\" обязательно!", 400);
+            return;
+        }
+
         boolean hasId = jsonObject.has("id");
         try {
             GsonBuilder gsonBuilder = new GsonBuilder();
@@ -84,15 +83,15 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
             gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
             Gson gson = gsonBuilder.create();
 
-            Epic epic = gson.fromJson(body, Epic.class);
+            Subtask subtask = gson.fromJson(body, Subtask.class);
 
             if (hasId) {
-                fileBackedTaskManager.updateTask(epic);
+                fileBackedTaskManager.updateTask(subtask);
             } else {
-                fileBackedTaskManager.createTask(epic);
+                fileBackedTaskManager.createTask(subtask);
             }
 
-            String response = gson.toJson(epic);
+            String response = gson.toJson(subtask);
             writeResponse(exchange, response, 201);
 
         } catch (CrossTimeException e) {
@@ -102,52 +101,25 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         }
     }
 
-    private void handleGetEpicSubtasks(HttpExchange exchange) throws IOException {
-        Optional<Integer> epicId = getIdFromRequest(exchange);
-
-        if (epicId.isEmpty()) {
-            writeResponse(exchange, "Некорректный идентификатор", 400);
-            return;
-        }
-        int id = epicId.get();
-        try {
-
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
-            gsonBuilder.registerTypeAdapter(Duration.class, new DurationTypeAdapter());
-            gsonBuilder.setPrettyPrinting();
-            Gson gson = gsonBuilder.create();
-
-            String response = gson.toJson(fileBackedTaskManager.getSubtaskByEpic(id));
-
-            writeResponse(exchange, response, 200);
-        } catch (NotFoundException e) {
-            writeResponse(exchange, "Эпик с id: " + id + " не найден!", 404);
-        }
-    }
-
     private Endpoint getEndpoint(String requestPath, String requestMethod) {
         String[] pathParts = requestPath.split("/");
 
         if (requestMethod.equals("GET")) {
 
-            if (pathParts[1].equals("epics")) {
+            if (pathParts[1].equals("subtasks")) {
                 if (pathParts.length == 2) {
-                    return Endpoint.GET_EPICS;
+                    return Endpoint.GET_SUBTASKS;
                 }
                 if (pathParts.length == 3) {
-                    return Endpoint.GET_EPIC;
-                }
-                if (pathParts.length == 4 && pathParts[3].equals("subtasks")) {
-                    return Endpoint.GET_EPICS_SUBTASKS;
+                    return Endpoint.GET_SUBTASK;
                 }
             }
         }
-        if (requestMethod.equals("POST") && pathParts[1].equals("epics") && pathParts.length == 2) {
-            return Endpoint.POST_EPIC;
+        if (requestMethod.equals("POST") && pathParts[1].equals("subtasks") && pathParts.length == 2) {
+            return Endpoint.POST_SUBTASK;
         }
-        if (requestMethod.equals("DELETE") && pathParts[1].equals("epics") && pathParts.length == 3) {
-            return Endpoint.DELETE_EPIC;
+        if (requestMethod.equals("DELETE") && pathParts[1].equals("subtasks") && pathParts.length == 3) {
+            return Endpoint.DELETE_SUBTASK;
         }
 
         return Endpoint.UNKNOWN;
@@ -155,4 +127,3 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
 
 
 }
-
