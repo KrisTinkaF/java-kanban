@@ -15,6 +15,7 @@ public class HttpTaskServer {
         HttpTaskServer.fileBackedTaskManager = fileBackedTaskManager;
         HttpTaskServer.inMemoryHistoryManager = inMemoryHistoryManager;
     }
+
     private static final int PORT = 8080;
 
     private static TaskManager fileBackedTaskManager;
