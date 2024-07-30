@@ -68,10 +68,15 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         boolean hasId = jsonObject.has("id");
         try {
             Epic epic = gson.fromJson(body, Epic.class);
-            if (hasId) {
-                taskManager.updateTask(epic);
-            } else {
+            if (!hasId) {
                 taskManager.createTask(epic);
+            } else {
+                int id = jsonObject.get("id").getAsInt();
+                if (id == 0) {
+                    taskManager.createTask(epic);
+                } else {
+                    taskManager.updateTask(epic);
+                }
             }
             String response = gson.toJson(epic);
             writeResponse(exchange, response, 201);

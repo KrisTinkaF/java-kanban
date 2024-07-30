@@ -150,25 +150,6 @@ public class HttpTaskServerTest {
     }
 
     private HttpResponse<String> getCreateSubtaskResponse() throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-
-        URI url = URI.create("http://localhost:8080/subtasks");
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .POST(HttpRequest.BodyPublishers.ofString("{\n" +
-                        "    \"type\":\"SUBTASK\",\n" +
-                        "    \"name\":\"Имя\",\n" +
-                        "    \"description\":\"описание\",\n" +
-                        "    \"status\":\"NEW\",\n" +
-                        "    \"startTime\":\"21-12-2024, 09:30\",\n" +
-                        "    \"duration\":\"PT30M\",\n" +
-                        "    \"parentId\":13\n" +
-                        "}"))
-                .build();
-        return client.send(request, HttpResponse.BodyHandlers.ofString());
-    }
-
-    private HttpResponse<String> getCreateSubtaskResponse2() throws IOException, InterruptedException {
         Subtask subtask = new Subtask("Имя", "описание", LocalDateTime.of(2024, 7, 21, 9, 30), Duration.ofMinutes(30), taskManager.getById(13).getId());
         subtask.setStatus(Status.NEW);
         HttpClient client = HttpClient.newHttpClient();

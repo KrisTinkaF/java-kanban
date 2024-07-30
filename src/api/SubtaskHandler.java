@@ -69,10 +69,15 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
         boolean hasId = jsonObject.has("id");
         try {
             Subtask subtask = gson.fromJson(body, Subtask.class);
-            if (hasId) {
-                taskManager.updateTask(subtask);
-            } else {
+            if (!hasId) {
                 taskManager.createTask(subtask);
+            } else {
+                int id = jsonObject.get("id").getAsInt();
+                if (id == 0) {
+                    taskManager.createTask(subtask);
+                } else {
+                    taskManager.updateTask(subtask);
+                }
             }
             String response = gson.toJson(subtask);
             writeResponse(exchange, response, 201);

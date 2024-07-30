@@ -63,18 +63,23 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
         try {
             Task task = gson.fromJson(body, Task.class);
 
-            if (hasId) {
-                taskManager.updateTask(task);
-            } else {
+            if (!hasId) {
                 taskManager.createTask(task);
+            } else {
+                int id = jsonObject.get("id").getAsInt();
+                if (id == 0) {
+                    taskManager.createTask(task);
+                } else {
+                    taskManager.updateTask(task);
+                }
             }
 
             String response = gson.toJson(task);
             writeResponse(exchange, response, 201);
 
-        } catch (CrossTimeException e) {
+        } catch (NotFoundException e) {
             writeResponse(exchange, e.getMessage(), 404);
-        } catch (Exception e) {
+        } catch (CrossTimeException e) {
             writeResponse(exchange, e.getMessage(), 400);
         }
     }

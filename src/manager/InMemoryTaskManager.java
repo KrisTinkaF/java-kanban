@@ -140,9 +140,12 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task updateTask(Task task) throws CrossTimeException {
+    public Task updateTask(Task task) throws CrossTimeException, NotFoundException {
         if (task.getType() == Type.EPIC) {
             Epic oldEpic = (Epic) tasks.get(task.getId());
+            if (oldEpic == null) {
+                throw new NotFoundException("Эпик с таким id не найдена!");
+            }
             if (oldEpic.getStatus() != task.getStatus()) {
                 System.out.println("Статус задачи типа Epic не может быть изменен пользователем");
                 task.setStatus(oldEpic.getStatus());
@@ -151,6 +154,9 @@ public class InMemoryTaskManager implements TaskManager {
         } else if (task.getType() == Type.SUBTASK) {
             Subtask newSubtask = (Subtask) task;
             Subtask oldSubtask = (Subtask) tasks.get(task.getId());
+            if (oldSubtask == null) {
+                throw new NotFoundException("Сабтаск с таким id не найдена!");
+            }
             //Epic parent = (Epic) tasks.get((newSubtask).getParentId());
             addTask(task);
             if (oldSubtask.getStatus() != task.getStatus()) {
@@ -165,6 +171,9 @@ public class InMemoryTaskManager implements TaskManager {
 
         } else {
             addTask(task);
+        }
+        if (tasks.get(task.getId()) == null) {
+            throw new NotFoundException("Сабтаск с таким id не найдена!");
         }
         return tasks.get(task.getId());
     }
