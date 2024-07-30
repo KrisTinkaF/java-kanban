@@ -1,6 +1,7 @@
 package manager;
 
 import model.CrossTimeException;
+import model.NotFoundException;
 import model.Subtask;
 import model.Task;
 import model.Type;
@@ -19,13 +20,13 @@ public interface TaskManager {
 
     void deleteAll();
 
-    Task getById(int id);
+    Task getById(int id) throws NotFoundException;
 
     void deleteById(int id);
 
     Task updateTask(Task task) throws CrossTimeException;
 
-    List<Subtask> getSubtaskByEpic(Task epic);
+    List<Subtask> getSubtaskByEpic(int epicId);
 
     HistoryManager getInMemoryHistoryManager();
 

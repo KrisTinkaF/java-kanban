@@ -90,7 +90,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             case "SUBTASK":
                 System.out.println(super.getAll());
                 System.out.println(super.getPrioritizedTasks());
-                Subtask subtask = new Subtask(Integer.parseInt(split[0]), split[2], split[3], convertStringToStatus(split[4]), start, Duration.parse(split[6]), (Epic) getById(Integer.parseInt(split[7])));
+                Subtask subtask = new Subtask(Integer.parseInt(split[0]), split[2], split[3], convertStringToStatus(split[4]), start, Duration.parse(split[6]), Integer.parseInt(split[7]));
                 super.createTask(subtask);
                 return subtask;
             case "EPIC":
